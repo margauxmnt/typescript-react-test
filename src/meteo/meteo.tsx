@@ -1,11 +1,10 @@
-import {FC} from "react";
+import {FC, useState} from "react";
 import {getEmojiFromWeatherCode} from "./emojis";
 import {CurrentDay} from "./ui/current-day";
 import styled from "styled-components";
 import {DayOfWeek} from "./ui/day-of-week";
 import {HourlyMeteo} from "./ui/hour";
 import {DailyForecast} from "./types";
-
 
 interface MeteoHandlerProps {
     week: DailyForecast[]
@@ -17,30 +16,29 @@ const WeekWrapper = styled.div`
   justify-content: center;
 `
 export const Meteo: FC<MeteoHandlerProps> = ({week}) => {
-    const today = new Date(0);
+    const [today, setToday] = useState<DailyForecast>(week[0])
+
+    const handleClick = (day : DailyForecast) => {
+        setToday(day)
+    }
+
+    const weekList = week.map((day, i) => {
+        return <DayOfWeek key={i} date={day.date} emoji={getEmojiFromWeatherCode(day.weatherCode)} isCurrent={today.date === day.date ? true : false} onClick={() => handleClick(day)}/>
+    })
+
+    const hourlyList = (today.hourly).map((hours, i) => {
+        return <HourlyMeteo key={i} unit={'celsius'} emoji={getEmojiFromWeatherCode(hours.weatherCode)} temperature={hours.temperature} time={hours.time}/>
+    })
+
     return <div className="currentDay">
-        <CurrentDay date={today}
-                    emoji={getEmojiFromWeatherCode(0)}
+        <CurrentDay date={today.date}
+                    emoji={getEmojiFromWeatherCode(today.weatherCode)}
                     unit={'celsius'}
-                    minTemperature={10}
-                    maxTemperature={35}/>
+                    minTemperature={today.minTemperature}
+                    maxTemperature={today.maxTemperature}/>
         <WeekWrapper>
-            <DayOfWeek date={today} emoji={getEmojiFromWeatherCode(0)} isCurrent={false}/>
-            <DayOfWeek date={today} emoji={getEmojiFromWeatherCode(0)} isCurrent={false}/>
-            <DayOfWeek date={today} emoji={getEmojiFromWeatherCode(0)} isCurrent={true}/>
-            <DayOfWeek date={today} emoji={getEmojiFromWeatherCode(0)} isCurrent={false}/>
-            <DayOfWeek date={today} emoji={getEmojiFromWeatherCode(0)} isCurrent={false}/>
-            <DayOfWeek date={today} emoji={getEmojiFromWeatherCode(0)} isCurrent={false}/>
-            <DayOfWeek date={today} emoji={getEmojiFromWeatherCode(0)} isCurrent={false}/>
+            {weekList}
         </WeekWrapper>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
-        <HourlyMeteo unit={'celsius'} emoji={getEmojiFromWeatherCode(0)} temperature={25} time={today}/>
+        {hourlyList}
     </div>
 }
